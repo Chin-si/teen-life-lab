@@ -47,17 +47,6 @@ A fun, interactive, and addictive frontend-only web app designed for teens to ex
 
 ---
 
-## Deployment
-
-This app is **frontend-only** and can be deployed on **GitHub Pages**:
-
-1. Save the main code as `index.html`.  
-2. Create a GitHub repository and upload the file.  
-3. Go to **Settings → Pages → Source → main branch → /root**.  
-4. Your app will be live at `https://USERNAME.github.io/REPO_NAME/`.  
-
----
-
 ## Customization
 
 - Replace the **AdSense placeholder** with your AdSense script to monetize.  
