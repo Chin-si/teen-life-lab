@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teen Life Lab – Addictive Quizzes</title>
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: #0f0f14;
+    color: white;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+.container {
+    max-width: 700px;
+    width: 100%;
+}
+.card {
+    background: #1c1c24;
+    padding: 25px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 25px rgba(255,0,150,0.2);
+}
+h1, h2 {
+    color: #ff6fd8;
+    text-align: center;
+}
+button {
+    padding: 14px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #ff6fd8;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 6px;
+    transition: .2s;
+}
+button:hover {
+    transform: scale(1.05);
+}
+.result {
+    margin-top: 15px;
+    font-size: 18px;
+}
+.bar {
+    height: 22px;
+    background: #333;
+    border-radius: 10px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+.fill {
+    height: 100%;
+    background: #ff6fd8;
+    width: 0%;
+    transition: 1s;
+}
+.share {
+    margin-top: 15px;
+}
+.notice {
+    font-size: 13px;
+    opacity: .7;
+    margin-top: 10px;
+}
+.streak {
+    color: #ffd700;
+    margin-top: 10px;
+}
+.ad-placeholder {
+    background: #333;
+    text-align: center;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    color: #aaa;
+}
+canvas {
+    display: none;
+}
+.progress {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #ff6fd8;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Teen Life Lab – Secret Quizzes</h1>
+
+    <!-- MAIN QUIZ CARD -->
+    <div class="card" id="quiz-card">
+        <h2>Personality & Social Quiz</h2>
+        <div id="question">Press Start to discover your personality!</div>
+        <div id="choices"></div>
+        <button id="startBtn">Start Quiz</button>
+        <div id="result" class="result"></div>
+        <div id="feedback"></div>
+        <div class="share">
+            <button id="shareBtn">Share My Result</button>
+        </div>
+        <div class="notice" id="socialNotice"></div>
+    </div>
+
+    <!-- DAILY CHALLENGE CARD -->
+    <div class="card" id="daily-card">
+        <h2>🔥 Daily Challenge</h2>
+        <button id="dailyBtn">Get Today's Challenge</button>
+        <div id="challenge"></div>
+        <div class="streak" id="streak"></div>
+        <button id="downloadBtn">Download Challenge Image</button>
+    </div>
+
+    <!-- SECRET QUIZZES PROGRESS -->
+    <div class="card" id="progress-card">
+        <h2>Secret Quizzes Progress</h2>
+        <div id="secretProgress"></div>
+    </div>
+
+    <!-- GOOGLE ADSENSE PLACEHOLDER -->
+    <div class="ad-placeholder">
+        <!-- Replace with your Google AdSense code -->
+        Ad placeholder 
+    </div>
+
+    <!-- CANVAS FOR DOWNLOAD -->
+    <canvas id="download-canvas" width="600" height="600"></canvas>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+    // ---------------------
+    // QUIZ DATA
+    // ---------------------
+    const mainQuestions = [
+        {q:"Your friends describe you as:",options:["Calm","Funny","Popular","Independent"],points:[1,3,4,2]},
+        {q:"If someone you like texts you, you:",options:["Reply fast","Wait to seem cool","Send a funny message","Think carefully"],points:[3,2,4,1]},
+        {q:"Your perfect weekend:",options:["Relaxing","Hanging out","Going out","Creative"],points:[1,3,4,2]},
+        {q:"On social media you:",options:["Scroll quietly","Post funny","Share moments","Express thoughts"],points:[1,3,4,2]},
+        {q:"Friendship is important when:",options:["Need support","Want fun","Need attention","Like independence"],points:[2,4,3,1]},
+        {q:"You are energized when:",options:["Alone","With friends","At parties","Creating"],points:[1,3,4,2]},
+        {q:"Ideal date activity:",options:["Coffee walk","Fun amusement","Dinner","Creative"],points:[3,2,4,1]},
+        {q:"React to trends:",options:["Observe","Try","Share","Make your own"],points:[1,3,4,2]},
+        {q:"Free time preference:",options:["Reading","Games with friends","Going out","Creating"],points:[1,3,4,2]},
+        {q:"Choices approach:",options:["Think","Decide fast","Ask friends","Follow instincts"],points:[2,4,3,1]}
+    ];
+
+    const secretQuizzes = [
+        {title:"TikTok Trend Quiz",questions:[
+            {q:"Which trend are you secretly dominating?",options:["Dance","Lip-sync","Comedy","DIY"]},
+            {q:"Which style reflects you best?",options:["Funny","Creative","Stylish","Chill"]},
+            {q:"Your go-to viral dance?",options:["Floss","Renegade","Shuffle","Custom"]}
+        ]},
+        {title:"Love Compatibility Quiz",questions:[
+            {q:"Which type of crush are you drawn to?",options:["Cute & quiet","Funny & bold","Creative & unique","Popular & charming"]},
+            {q:"Ideal first date?",options:["Coffee walk","Dinner","Amusement park","Creative"]},
+            {q:"Flirting style?",options:["Subtle","Bold","Funny","Direct"]}
+        ]},
+        {title:"Friendship Superpower Quiz",questions:[
+            {q:"Hidden friendship talent?",options:["Listening","Making people laugh","Being supportive","Planning adventures"]},
+            {q:"Support friends how?",options:["Advice","Memes","Motivation","Surprises"]},
+            {q:"Funniest friend habit?",options:["Pranks","Nicknames","Inside jokes","Stories"]}
+        ]},
+        {title:"Social Media Persona Quiz",questions:[
+            {q:"Platform reflects you?",options:["Instagram","TikTok","Snapchat","YouTube"]},
+            {q:"Posting style?",options:["Funny","Creative","Inspirational","Random"]},
+            {q:"Exciting content?",options:["Viral trends","Challenges","Life hacks","Funny clips"]}
+        ]}
+    ];
+
+    let qIndex = 0;
+    let score = 0;
+    let currentQuiz = null;
+    let currentSecret = null;
+
+    // ---------------------
+    // SECRET QUIZZES PROGRESS
+    // ---------------------
+    let secretProgress = {};
+    try {
+        secretProgress = JSON.parse(localStorage.getItem("secretProgress")||"{}");
+    } catch(e){ secretProgress = {}; }
+    const updateProgressUI = () => {
+        let html = "";
+        secretQuizzes.forEach(s => {
+            html += `${s.title}: ${secretProgress[s.title]? "✅ Completed":"❌ Not yet"}<br>`;
+        });
+        document.getElementById("secretProgress").innerHTML = html;
+    }
+    updateProgressUI();
+
+    // ---------------------
+    // MAIN QUIZ FLOW
+    // ---------------------
+    const startQuiz = () => {
+        qIndex = 0; score = 0; currentQuiz = "main";
+        document.getElementById("result").innerHTML="";
+        document.getElementById("feedback").innerHTML="";
+        showQuestion();
+    };
+
+    const showQuestion = () => {
+        let quiz = currentQuiz==="main"? mainQuestions : currentSecret.questions;
+        if(qIndex >= quiz.length) {
+            if(currentQuiz==="main") showResult();
+            else showSecretResult();
+            if(currentQuiz==="main") checkSecretUnlock();
+            return;
+        }
+        const q = quiz[qIndex];
+        document.getElementById("question").innerText = currentQuiz==="main"? q.q : currentSecret.title+": "+q.q;
+        let html = "";
+        q.options.forEach((opt,i)=>{
+            html += `<button onclick="answer(${i})">${opt}</button>`;
+        });
+        document.getElementById("choices").innerHTML = html;
+    }
+
+    window.answer = (i) => {
+        let quiz = currentQuiz==="main"? mainQuestions : currentSecret.questions;
+        let points = currentQuiz==="main"? quiz[qIndex].points[i]||1 : 1;
+        score += points;
+        showFeedback(i);
+        qIndex++;
+        setTimeout(showQuestion,1200);
+    }
+
+    const showFeedback = (choice) => {
+        let percent = Math.floor(Math.random()*40)+30;
+        document.getElementById("feedback").innerHTML = `<div class="bar"><div class="fill" style="width:${percent}%"></div></div><div>${percent}% of teens chose similar</div>`;
+        let people = Math.floor(Math.random()*8000)+2000;
+        document.getElementById("socialNotice").innerText = `💬 ${people.toLocaleString()} teens answered today`;
+    }
+
+    // ---------------------
+    // MAIN QUIZ RESULT
+    // ---------------------
+    const showResult = () => {
+        let text = "";
+        if(score<=12) text = "Calm and reflective.";
+        else if(score<=20) text = "Balanced energy, fun and caring.";
+        else if(score<=28) text = "High social energy, creative and exciting.";
+        else text = "Trendsetter, bold and inspiring!";
+        document.getElementById("result").innerHTML = `<b>Your Personality Insight:</b><br>${text}`;
+        triggerRandomReward();
+    }
+
+    // ---------------------
+    // RANDOM REWARD
+    // ---------------------
+    const triggerRandomReward = () => {
+        if(Math.random()<0.5){
+            let remaining = secretQuizzes.filter(s => !secretProgress[s.title]);
+            if(remaining.length>0){
+                currentSecret = remaining[Math.floor(Math.random()*remaining.length)];
+                currentQuiz = "secret"; qIndex=0; score=0;
+                showBonusPopup("🌟 Secret Quiz Unlocked: "+currentSecret.title+"!");
+                setTimeout(showQuestion,1500);
+            }
+        }
+    }
+
+    // ---------------------
+    // SECRET QUIZ RESULT
+    // ---------------------
+    const showSecretResult = () => {
+        document.getElementById("result").innerHTML = `<b>${currentSecret.title} Result:</b><br>Completed! Share with friends!`;
+        secretProgress[currentSecret.title] = true;
+        localStorage.setItem("secretProgress", JSON.stringify(secretProgress));
+        updateProgressUI();
+        currentQuiz = null;
+    }
+
+    const showBonusPopup = (text) => { alert(text); }
+
+    // ---------------------
+    // SHARE
+    // ---------------------
+    const shareResult = () => {
+        let text = document.getElementById("result").innerText;
+        if(navigator.share){
+            navigator.share({title:"My Personality Result", text:text, url:location.href});
+        } else {
+            navigator.clipboard.writeText(text+" "+location.href);
+            alert("Result copied! Share with friends.");
+        }
+    }
+
+    // ---------------------
+    // DAILY CHALLENGE
+    // ---------------------
+    const challenges = [
+        "Send a kind message.",
+        "Compliment someone.",
+        "Try a new activity.",
+        "Share a happy moment.",
+        "Create something.",
+        "Make someone laugh."
+    ];
+
+    const dailyChallenge = () => {
+        let today = new Date().toDateString();
+        let last = localStorage.getItem("last");
+        if(last===today){
+            document.getElementById("challenge").innerText = "Today's challenge already unlocked! Come back tomorrow!";
+            return;
+        }
+        let rand = challenges[Math.floor(Math.random()*challenges.length)];
+        document.getElementById("challenge").innerText = rand;
+        localStorage.setItem("last",today);
+        let streak = parseInt(localStorage.getItem("streak")||0); streak++; localStorage.setItem("streak",streak);
+        document.getElementById("streak").innerText = "🔥 Streak: "+streak+" days";
+        if(Math.random()<0.3) showBonusPopup("🌟 Rare bonus unlocked! +1 streak day!");
+    }
+
+    // ---------------------
+    // DOWNLOAD IMAGE
+    // ---------------------
+    const downloadImage = () => {
+        let canvas = document.getElementById("download-canvas");
+        let ctx = canvas.getContext("2d");
+        ctx.fillStyle="#111"; ctx.fillRect(0,0,600,600);
+        ctx.fillStyle="white"; ctx.font="24px Arial"; ctx.textAlign="center";
+        let text = document.getElementById("challenge").innerText;
+        ctx.fillText("Today's Challenge",300,150);
+        wrapText(ctx,text,300,200,500,30);
+        let link=document.createElement("a"); link.download="challenge.png"; link.href=canvas.toDataURL(); link.click();
+    }
+
+    const wrapText = (ctx,text,x,y,maxWidth,lineHeight) => {
+        const words=text.split(' ');
+        let line='';
+        for(let n=0;n<words.length;n++){
+            const testLine = line+words[n]+' ';
+            const metrics = ctx.measureText(testLine);
+            if(metrics.width>maxWidth && n>0){ ctx.fillText(line,x,y); line=words[n]+' '; y+=lineHeight; }
+            else { line = testLine; }
+        }
+        ctx.fillText(line,x,y);
+    }
+
+    // ---------------------
+    // EVENT LISTENERS
+    // ---------------------
+    document.getElementById("startBtn").addEventListener("click", startQuiz);
+    document.getElementById("shareBtn").addEventListener("click", shareResult);
+    document.getElementById("dailyBtn").addEventListener("click", dailyChallenge);
+    document.getElementById("downloadBtn").addEventListener("click", downloadImage);
+});
+</script>
+</body>
+</html>
